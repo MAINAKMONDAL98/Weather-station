@@ -1,13 +1,13 @@
 #include "ThingSpeak.h"
 #include <ESP8266WiFi.h>
 
-char ssid[] = "ding";   // your network SSID (name) 
-char pass[] = "12345678";   // your network password
+char ssid[] = "";   // your network SSID (name) 
+char pass[] = "";   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
 
-unsigned long myChannelNumber = 1106542;
-const char * myWriteAPIKey = "H8MQTRWKBX22APET";
+unsigned long myChannelNumber = ;
+const char * myWriteAPIKey = "";
 
 int number = 0;
 
