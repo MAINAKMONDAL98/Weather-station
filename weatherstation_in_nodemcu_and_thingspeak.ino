@@ -1,5 +1,13 @@
 #include "ThingSpeak.h"
 #include <ESP8266WiFi.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
+
+#include <TinyGPS++.h>
+
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 char ssid[] = "";   // your network SSID (name) 
 char pass[] = "";   // your network password
@@ -11,19 +19,13 @@ const char * myWriteAPIKey = "";
 
 int number = 0;
 
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
 
-#define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BME280 bme;
 
 float temperature, humidity, pressure, altitude;
 
 
-
-#include <TinyGPS++.h>
 TinyGPSPlus gps;
 
 
