@@ -18,7 +18,7 @@ unsigned long myChannelNumber = 1106607;
 const char * myWriteAPIKey = "U7JNG14Q3FIEB1SK";
 
 int number = 0;
-
+int x;
 
 
 Adafruit_BME280 bme;
@@ -62,7 +62,7 @@ void loop() {
       Serial.print(" Longitude= "); 
       Serial.println(gps.location.lng(), 6);
       number=gps.location.lng();
-      ThingSpeak.writeField(myChannelNumber, 6, number, myWriteAPIKey);
+      x =ThingSpeak.writeField(myChannelNumber, 6, number, myWriteAPIKey);
     }
   }
   
@@ -80,7 +80,6 @@ void loop() {
   
   // Write to ThingSpeak. There are up to 8 fields in a channel, allowing you to store up to 8 different
   // pieces of information in a channel.  Here, we write to field 1.
-  int x = ThingSpeak.writeField(myChannelNumber, 2, number, myWriteAPIKey);//enter the field number as integer
   if(x == 200){
     Serial.println("Channel update successful.");
   }
