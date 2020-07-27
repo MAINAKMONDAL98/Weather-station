@@ -14,8 +14,8 @@ char pass[] = "";   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
 
-unsigned long myChannelNumber = ;
-const char * myWriteAPIKey = "";
+unsigned long myChannelNumber = 1106607;
+const char * myWriteAPIKey = "U7JNG14Q3FIEB1SK";
 
 int number = 0;
 
