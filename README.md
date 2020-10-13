@@ -1,4 +1,5 @@
 # Weather-station
+connect bme and I2C disply parallely.
 Wiring BME280 Sensor to ESP8266 NodeMCU<br/>
 Connections are fairly simple. Start by connecting VIN pin to the 3.3V output on the <br/>
 ESP8266 NodeMCU and connect GND to ground. Next, <br/>
