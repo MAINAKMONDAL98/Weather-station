@@ -1,0 +1,213 @@
+//https://github.com/MAINAKMONDAL98
+#include "ThingSpeak.h"
+#include <ESP8266WiFi.h>
+#include <DHT.h>
+#include <Wire.h>
+//#include <LiquidCrystal.h> 
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+#include <bmp180.h>
+DHT dht; BMP180 bmp;
+LiquidCrystal lcd(13, 12, 4, 5, 6, 7);
+char* previsione[ ] = {"Variable","Clear_weather","Rain",
+"Thunderstorm","cloudy_weather' ',"Sunny_weather"};
+char degree = 223; // Symbol °
+
+const int inPin = 2;
+const int alt = 50;
+int corrP = 0;
+int H, C, decC, difP,i;	
+long P, memP;
+char statusP;
+long time180 = 0; // 3 hours (180 minutes)
+
+char ssid[] = "";   // your network SSID (name) 
+char pass[] = "";   // your network password
+int keyIndex = 0;            // your network key Index number (needed only for WEP)
+WiFiClient  client;
+
+unsigned long myChannelNumber = 1106607;
+const char * myWriteAPIKey = "U7JNG14Q3FIEB1SK";
+int number = 0;
+int x;
+void setup() {
+lcd.init(); // initialize the lcd
+lcd.backlight();
+lcd.setCursor(0, 0);
+WiFi.mode(WIFI_STA); 
+ThingSpeak.begin(client);  // Initialize ThingSpeak
+corrP = alt / 8.4; // Press correction ass \ rel
+corrP = 0;	// Sea level station
+dht.setup(inPin);	// DHT22 initialization
+bmp.begin(1);	// BME280 initialization
+lcd.begin(20, 4);
+delay(1000);
+C = bmp.getCelsiusHundredths();
+P = bmp.getPressurePascals();
+P = (P / 100) + corrP;
+memP = P;
+statusP = '=';
+delay(1000);
+}
+
+
+void loop() {
+// Check presence of BME280 sensor on i2C
+
+Wire.beginTransmission (119); // Indirizzo 0x77 if (Wire.endTransmission () != 0)
+{
+lcd.clear();
+lcd.setCursor(4,0);lcd.print("I2C error");
+lcd.setCursor(2,1);lcd.print("BME280 sensor"); 
+lcd.setCursor(3,2);lcd.print("not detected"); 
+delay(200);
+return;
+H = dht.getHumidity();
+ThingSpeak.writeField(myChannelNumber, 2, H, myWriteAPIKey);
+C = bmp.getCelsiusHundredths();
+ThingSpeak.writeField(myChannelNumber, 1,  C, myWriteAPIKey);
+decC = C % 100;
+C = C / 100;
+P = bmp.getPressurePascals();
+P = (P / 100) + corrP;
+ThingSpeak.writeField(myChannelNumber, 3,  P, myWriteAPIKey);
+if (time180 >= 10800) // 3 hours
+{
+updatePressure();
+updateForecast();
+time180 = 0;
+}
+delay(1000);
+time180++;
+updateLCD();
+ThingSpeak.writeField(myChannelNumber, 4,  previsione[i], myWriteAPIKey);
+}
+
+void updateLCD()
+{
+lcd.clear();
+lcd.setCursor(0,0);
+lcd.print("Tend: "); lcd.print(previsione[i]);
+lcd.setCursor(0,1);
+lcd.print("Temp: ");
+lcd.print(C); lcd.print("."); 
+lcd.print(decC);
+lcd.print(" "); lcd.print(grado); lcd.print("C"); 
+lcd.setCursor(0,2);
+lcd.print("Pres: "); lcd.print(P); lcd.print(" hPa ");
+lcd.print("("); lcd.print(statusP); lcd.print(") ");
+lcd.print(difP);
+lcd.setCursor(0,3);
+lcd.print("Umid: "); lcd.print(H); lcd.print(" % ");
+if (H == 0)
+{
+lcd.setCursor(6, 3);
+lcd.print("Errore DHT11");
+     }
+}
+void updatePressure()
+{
+if(memP > P)
+{
+statusP = '-';
+}
+else if (memP < P)
+{
+statusP = '+';
+}
+else if(memP = P)
+{
+statusP = '=;
+}
+difP = memP - P;
+difP = abs(difP); 
+memP = P;
+}
+void updateForecast()
+{
+// HIGH PRESSURE
+
+if((difP==0) && (P >=1024))
+{
+i = 5; // Sunny_weather
+}
+else if((difP==1) && (P >=1024) && (statusP == '+'))
+{
+i = 5;	// Sunny_weather
+}
+else if((difP == 1) && (P >=1024) && (statusP == '-'))
+{
+i = 0;	// Variable
+}
+
+else if((difP >= 2) & (P >=1024) && (statusP == '-'))
+
+
+{
+
+i = 4; // Cloudy_weather
+}
+
+else if((difP==0) && (P >=1008))
+{
+i = 1; // Clear_weather
+}
+else if((difP==1) && (P >=1008) && (statusP == '+'))
+{
+i = 1;	// Clear_weather
+
+}else if((difP == 1) & (P >=1008) && (statusP == '-'))
+{
+i = 4;	// Cloudy_weather
+}
+else if((difP >= 1)	&& (P >=1008) && (statusP == '-'))
+{
+i = 0;	// Variable
+
+}
+
+
+
+else if((difP >= 2)	&& (P >=1008) && (statusP == '+'))
+{
+i = 0;	// Variable
+
+}
+
+
+
+// LOW PRESSURE
+
+							
+else if((difP == 0)	&& (P < 1008))				
+{							
+i = 1;	// Clear_weather							
+}							
+else if((difP == 1)	&& (P < 1008)   && (statusP == '-'))
+{							
+i = 0;	// Variable							
+}							
+else if((difP == 1)	&& (P < 1008)	&& (statusP == '+'))
+{							
+i = 1;	// Clear_weather							
+}							
+else if((difP >= 2)	&& (P < 1008)	&& (statusP ==	'+'))
+{							
+i = 4;	// Cloudy_weather							
+}						
+else if((difP == 2)	&& (P <	1008)	&& (statusP ==	'-'))
+{							
+i = 4;	// Cloudy_weather							
+}							
+else if((difP == 3)	&& (P < 1008) && (statusP ==	'-'))
+{							
+i = 2;	// Rain							
+}							
+else if((difP >= 4)	&& (P < 1008) && (statusP == '-'))
+{
+i = 3; // Thunderstorm
+
+}
+
+
+
